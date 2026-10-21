@@ -1,0 +1,1 @@
+{"name":"session-meter","version":"0.1.0","description":"Side pane: how full this chat's context is, usage-limit windows, and cost - in words, no color coding","types":"./types/index.d.ts","author":{"name":"David McMath"},"license":"UNLICENSED"}
