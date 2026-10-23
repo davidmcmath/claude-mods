@@ -9,6 +9,7 @@
 //           D:\TradeRight\Repository\_service_heartbeats.csv (via the device link).
 // Author  : Claude (Cowork)   Created: 2026-10-23
 // Change Log:
+//   0.1.1 2026-10-23 /meter also prints the dashboard as text in the chat and says whether the side panel was placed.
 //   0.1.0 2026-10-23 first version. Words, not colours (David is red/green colourblind).
 // =============================================================================
 import { atom, read, update } from 'claude-code'
@@ -63,6 +64,20 @@ async function poll($: EngineInterface) {
     }
 }
 
+async function asText($: EngineInterface): Promise<string> {
+  const m = await read($, meter)
+  const a = await read($, agents)
+  const out: string[] = ['TR METER']
+  if (!m || m.limits.length === 0) out.push('Plan limits: no reading yet')
+  for (const l of m?.limits ?? []) out.push(`${label(l.kind)}: ${l.percentUsed}% used ${when(l.resetsAt)}`)
+  out.push(`This chat: ${m?.contextPct ?? '?'}% full - ${advice(m?.contextPct) || 'measuring'}${m?.costUsd !== undefined ? ` - cost $${m.costUsd.toFixed(2)}` : ''}`)
+  const rows = a?.rows ?? []
+  const bad = rows.filter(r => r.state !== 'OK')
+  out.push(`Services/agents: ${rows.length} checked - ${bad.length === 0 && rows.length ? 'ALL OK' : `${bad.length} need a look`}${a?.error ? ' - ' + a.error : ''}`)
+  for (const r of bad) out.push(`  ${r.state} ${r.name} (last beat ${ago(r.ageS)} ago)`)
+  return out.join('\n')
+}
+
 export const register: Register = on => {
   on('session.start', async ($, e, next) => {
     await $.command.register({ name: 'meter', description: 'Open the TradeRight meter pane (plan limits, chat fullness, agents)' })
@@ -71,7 +86,11 @@ export const register: Register = on => {
     $.clock.every(60_000, () => { void poll($) })
     return next(e)
   })
-  on('command.run', { command: 'meter' }, async $ => { await $.ui.open({ id: PANE, title: 'TR Meter' }); void measure($); void poll($); return { text: 'TR Meter opened.' } })
+  on('command.run', { command: 'meter' }, async $ => {
+    const placed = await $.ui.open({ id: PANE, title: 'TR Meter' })
+    await measure($); await poll($)
+    return { text: await asText($) + `\n(side panel shown by your app: ${placed?.isPlaced ? 'yes' : 'no'})` }
+  })
   on('session.measure', async ($, e, next) => { await measure($); return next(e) })
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
