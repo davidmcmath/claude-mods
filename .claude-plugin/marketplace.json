@@ -1,1 +1,18 @@
-{"name":"claude-mods","owner":{"name":"David McMath"},"plugins":[{"name":"session-meter","source":"./plugins/session-meter","description":"Side pane: context fill of this chat, usage-limit windows and cost, in words"}]}
+{
+  "name": "claude-mods",
+  "owner": {
+    "name": "David McMath"
+  },
+  "plugins": [
+    {
+      "name": "session-meter",
+      "source": "./plugins/session-meter",
+      "description": "Side pane: context fill of this chat, usage-limit windows and cost, in words"
+    },
+    {
+      "name": "tr-meter",
+      "source": "./plugins/tr-meter",
+      "description": "Side pane: weekly/5-hour plan limits, chat fullness, and live TradeRight service/agent heartbeats, in words"
+    }
+  ]
+}

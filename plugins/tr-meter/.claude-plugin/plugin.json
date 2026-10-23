@@ -1,0 +1,1 @@
+{ "name": "tr-meter", "version": "0.1.0", "description": "TradeRight meter: weekly/5-hour plan limits, session fullness, and live service/agent heartbeats in a side pane and the status line", "types": "./types/index.d.ts" }
